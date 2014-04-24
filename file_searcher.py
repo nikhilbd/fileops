@@ -12,13 +12,13 @@ import codecs, sys
 
 
 class Searcher:
-    """
+    '''
     Prefix search for a string in a sorted file
 
     Usage:
     s = Searcher('file_path')
     s.find('test string')
-    """
+    '''
 
     def __init__(self, filename):
         self.file = codecs.open(filename, 'rb', encoding='utf-8')
@@ -67,7 +67,7 @@ class Searcher:
 # For easy running via a command line one-liner
 def main():
     if len(sys.argv) != 3:
-        print "Usage: python file_searcher.py filename search_string"
+        print 'Usage: python file_searcher.py filename search_string'
         sys.exit(-1)
 
     s = Searcher(sys.argv[1])

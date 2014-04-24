@@ -7,13 +7,15 @@
 # Currently supported aggregate operations: SUM & COUNT
 #
 # Usage:
-#   file_select_ops.py -h
+#  python file_select_ops.py [options] aggregate_func input_file
 
 import os, sys, csv_unicode, csv, optparse, file_ops_common
 from collections import defaultdict, OrderedDict
 
 def main():
-  opts = parse_args()
+  ''' Do SQL-like operations on a delimited text file'''
+
+  (opts, args) = parse_args()
 
   where_filters = {}
   if opts.where_clauses:
@@ -32,10 +34,15 @@ def main():
           'vals' : clause_parts[1].split(',')
         }
 
-  print 'Where clause : ' + str(where_filters)
-
   select_cols = [int(col) for col in opts.select_cols.split(',')]
   aggregate_cols = [int(col) for col in opts.aggregate_cols.split(',')]
+
+  if opts.verbose:
+    sys.stderr.write('Your query:\n' +
+      'select ' + opts.select_cols + ',' +
+      ', '.join(['%s(%s)' % (opts.agg_function, col) for col in aggregate_cols]) +
+      '\n group by ' + opts.aggregate_cols)
+    sys.stderr.write('\nWhere clause : ' + str(where_filters) + '\n')
 
   # The structure where we save the aggregated values
   # It is a nested dictionary for the form:
@@ -43,7 +50,7 @@ def main():
   aggregates = {}
 
   # Go through the input file and do the aggregation
-  for cols in csv_unicode.UnicodeReader(open(opts.input_file, 'r'),
+  for cols in csv_unicode.UnicodeReader(open(args[0], 'r'),
                                         delimiter=opts.delim):
 
     # Where filters
@@ -67,11 +74,10 @@ def main():
       elif opts.agg_function == 'count':
         aggregates[key][col_num] += 1
       else:
-        print 'Invalid aggregate function: ' + opts.agg_function
+        sys.stderr.write('Invalid aggregate function: ' + opts.agg_function)
         sys.exit(-1)
 
-  output = csv_unicode.UnicodeWriter(open(opts.output_file, 'w'),
-                                     delimiter=opts.delim)
+  output = csv_unicode.UnicodeWriter(sys.stdout, delimiter=opts.delim)
 
   # Output the remaining keys
   for key in aggregates:
@@ -82,39 +88,44 @@ def main():
     output.writerow(op_cols)
 
 def parse_args():
-  usage = os.path.basename(__file__) + ' -h'
-  parser = optparse.OptionParser(usage=usage)
+  desc = '''Do SQL-like operations on a delimited files.
+  E.g. "SELECT col1, col2, SUM(col3), SUM(col4)
+  WHERE col1 IN ("X", "Y") AND col2 != "Z"
+  GROUP BY col1, col2"
+  Currently supported aggregate operations: SUM & COUNT'''
 
-  parser.add_option('-i', '--input_file', dest='input_file',
-                    help='Input file')
-  parser.add_option('-o', '--output_file', dest='output_file',
-                    help='Output file')
+  usage = 'Usage: python %s [options] input_file' % (
+    os.path.basename(__file__))
+  parser = optparse.OptionParser(usage=usage, description=desc)
+
   parser.add_option('-s', '--select-cols', dest='select_cols',
                     default='0', help='List of columns in the input file to'
-                    ' SELECT & GROUP BY on. E.g. "0,1,5"')
+                    ' SELECT & GROUP BY on. E.g. "0,1,5". Default "0"')
   parser.add_option('-a', '--aggregate-cols', dest='aggregate_cols',
                     default='1', help='List of columns in the input file to'
-                    'run the aggregate function on. E.g. "1,5"')
+                    'run the aggregate function on. E.g. "1,5". Default="1"')
   parser.add_option(
     '-w', '--where-clauses', dest='where_clauses',
     help='Where clauses for the query. The format is "1=text1,text2;3!=text4".'
     ' This translates to '
     'WHERE col1 IN ("text2","text3") AND col3 != "text4"')
   parser.add_option('-d', '--delim', dest='delim', default='\t',
-                    help='Delimiter for the input & output files. E.g. ","')
+                    help='Delimiter for the input & output files. E.g. ",".'
+                    ' Default=$"\\t"')
   parser.add_option('-f', '--aggregate_function', dest='agg_function',
                     default='SUM',
-                    help='Aggregate function. Needs to be either SUM or COUNT')
+                    help='Aggregate function. Needs to be either SUM or COUNT. '
+                    'Default=SUM')
+  parser.add_option('-v', '--verbose', action='store_true', dest='verbose')
 
   (opts, args) = parser.parse_args()
 
   opts.agg_function = opts.agg_function.lower()
 
-  if not (opts.input_file and opts.output_file and (
-      opts.agg_function != 'sum' or opts.agg_function != 'count')):
-    print usage
-    sys.exit(-1)
-  return opts
+  if len(args) != 1 and (opts.agg_function != 'sum' or
+                         opts.agg_function != 'count'):
+    parser.error('Invalid arguments! ')
+  return (opts, args)
 
 
 if __name__ == '__main__':

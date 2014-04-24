@@ -7,16 +7,11 @@
 
 import os, sys, csv_unicode, csv, optparse
 
-def parse_args(is_intersect_script = False):
-  usage = os.path.basename(__file__) + ' -h'
-  parser = optparse.OptionParser(usage=usage)
+def parse_args(description, is_intersect_script = False):
+  usage = 'usage: <script_name> [options] left_file right_file'
 
-  parser.add_option('-l', '--left_file', dest='left_file',
-                    help='Left file')
-  parser.add_option('-r', '--right_file', dest='right_file',
-                    help='Right file')
-  parser.add_option('-o', '--output_file', dest='output_file',
-                    help='Output file')
+  parser = optparse.OptionParser(usage=usage, description=description)
+
   parser.add_option('-i', '--ignore_case', dest='lower_case',
                     action='store_true', help='Ignore the case for the key'
                     ' columns')
@@ -30,6 +25,7 @@ def parse_args(is_intersect_script = False):
                     help='Delimiter for the left file. E.g. ","')
   parser.add_option('--right-delim', dest='right_delim', default='\t',
                     help='Delimiter for the right file. E.g. ","')
+
   if is_intersect_script:
     parser.add_option('--insert-cols', dest='insert_cols', default='',
                       help='Columns from the right file to insert into the left.'
@@ -37,11 +33,9 @@ def parse_args(is_intersect_script = False):
                       ' only consider the 1st match row')
 
   (opts, args) = parser.parse_args()
-  if not (opts.left_file and opts.right_file and
-          opts.output_file):
-    print usage
-    sys.exit(-1)
-  return opts
+  if len(args) != 2:
+    parser.error('You need to provide the left & right files as inputs')
+  return (opts, args)
 
 def get_key(cols, key_cols):
   key = cols[key_cols[0]]
