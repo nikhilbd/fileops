@@ -10,12 +10,14 @@ Intersection of 2 files using a subset of columns in the files as intersection k
 
 ###### Example
 Given *file1.txt* as
+
     a,1,apple
     b,2,boy
     c,3,catch
     d,4,dog
 
 and *file2.txt* as
+
     b,2,bat
     d,4,donkey
     e,5,elephant
