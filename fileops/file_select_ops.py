@@ -114,7 +114,7 @@ def parse_args():
     parser.add_option('-d', '--delim', dest='delim', default='\t',
                       help='Delimiter for the input & output files. E.g. ",".'
                       ' Default=$"\\t"')
-    parser.add_option('-f', '--aggregate_function', dest='agg_function',
+    parser.add_option('-f', '--aggregate-function', dest='agg_function',
                       default='SUM',
                       help='Aggregate function. Needs to be either SUM or COUNT. '
                       'Default=SUM')
