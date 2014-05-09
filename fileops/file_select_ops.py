@@ -7,7 +7,7 @@
 # Currently supported aggregate operations: SUM & COUNT
 #
 # Usage:
-#  python file_select_ops.py [options] aggregate_func input_file
+#  python file_select_ops.py [options] input_file
 
 import os, sys, csv_unicode, csv, optparse, file_ops_common
 from collections import defaultdict, OrderedDict
