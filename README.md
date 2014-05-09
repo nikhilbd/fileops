@@ -8,7 +8,7 @@ Intersection of 2 files using a subset of columns in the files as intersection k
 ##### Usage
     python file_intersection.py [options] left_file right_file
 
-###### Example
+##### Example
 Given *file1.txt* as
 
     a,1,apple
@@ -38,7 +38,7 @@ Difference between 2 files using a subset of columns in the files as keys.
 ##### Usage
     python file_diff.py [options] left_file right_file
 
-###### Example
+##### Example
     
     python file_diff.py --left-delim=, --right-delim=, file.txt file2.txt
     a,1,apple
@@ -53,7 +53,7 @@ Lets you do a SQL-like SELECT/WHERE/GROUP BY aggregate operation on a file with 
 ##### Usage
     python file_select_ops.py [options] input_file
     
-###### Example
+##### Example
 
     ./file_select_ops.py --select-cols=0 --aggregate-cols=1 --aggregate-function=SUM --where-clauses="0!=c" file1.txt
     
@@ -75,7 +75,7 @@ Search within a *sorted* file using a string prefix
 ##### Usage
     python file_searcher.py filename search_string
 
-###### Example
+##### Example
 
 For file2.txt from the 1st example:
 
