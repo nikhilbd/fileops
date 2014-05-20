@@ -37,8 +37,12 @@ def parse_args(description, is_intersect_script = False):
         parser.error('You need to provide the left & right files as inputs')
     return (opts, args)
 
+KEY_DELIMITER='\t'
 def get_key(cols, key_cols):
     key = cols[key_cols[0]]
     for i in range(1, len(key_cols)):
-        key += '\t' + cols[key_cols[i]]
+        key += KEY_DELIMITER + cols[key_cols[i]]
     return key
+
+def split_key(key):
+    return key.split(KEY_DELIMITER)
