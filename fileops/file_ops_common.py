@@ -5,37 +5,32 @@
 # like file_intersection.py, file_diff.py etc.
 #
 
-import os, sys, csv_unicode, csv, optparse
+import os, sys, csv_unicode, csv, argparse
 
-def parse_args(description, is_intersect_script = False):
-    usage = 'usage: <script_name> [options] left_file right_file'
 
-    parser = optparse.OptionParser(usage=usage, description=description)
+def set_ops_parser():
+    ''' Common arguments for the file_diff and the file_intersection scripts '''
 
-    parser.add_option('-i', '--ignore_case', dest='lower_case',
-                      action='store_true', help='Ignore the case for the key'
-                      ' columns')
-    parser.add_option('--left-columns', dest='left_columns',
-                      default='0', help='List of columns in the left file to'
-                      'intersect on. E.g. "0,1,5"')
-    parser.add_option('--right-columns', dest='right_columns',
-                      default='0', help='List of columns in the right file to'
-                      'intersect on. E.g. "0,1,5"')
-    parser.add_option('--left-delim', dest='left_delim', default='\t',
-                      help='Delimiter for the left file. E.g. ","')
-    parser.add_option('--right-delim', dest='right_delim', default='\t',
-                      help='Delimiter for the right file. E.g. ","')
+    parser = argparse.ArgumentParser(add_help=False,
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    if is_intersect_script:
-        parser.add_option('--insert-cols', dest='insert_cols', default='',
-                          help='Columns from the right file to insert into the left.'
-                          ' If there are multiple rows matching from the right file, we'
-                          ' only consider the 1st match row')
+    parser.add_argument('left_file', help='Left input file')
+    parser.add_argument('right_file', help='Right input file')
+    parser.add_argument('-i', '--ignore_case', dest='lower_case',
+                        action='store_true', help='Ignore the case for the key'
+                        ' columns')
+    parser.add_argument('-l', '--left-columns', dest='left_columns',
+                        default='0', help='List of column numbers from the left file to'
+                        'intersect on. E.g. "0,1,5"')
+    parser.add_argument('-r', '--right-columns', dest='right_columns',
+                        default='0', help='List of column numbers from the right file to'
+                        'intersect on. E.g. "0,1,5"')
+    parser.add_argument('--left-delim', dest='left_delim', default='\t',
+                        help='Delimiter for the left file. E.g. ","')
+    parser.add_argument('--right-delim', dest='right_delim', default='\t',
+                        help='Delimiter for the right file. E.g. ","')
 
-    (opts, args) = parser.parse_args()
-    if len(args) != 2:
-        parser.error('You need to provide the left & right files as inputs')
-    return (opts, args)
+    return parser
 
 KEY_DELIMITER='\t'
 def get_key(cols, key_cols):
