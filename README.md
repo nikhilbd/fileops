@@ -55,19 +55,21 @@ Lets you do a SQL-like SELECT/WHERE/GROUP BY aggregate operation on a file with 
     
 ##### Example
 
-    ./file_select_ops.py --select-cols=0 --aggregate-cols=1 --aggregate-function=SUM --where-clauses="0!=c" file1.txt
-    
+    file_select_ops.py --select-cols="0,2" --aggregate-cols=1 --aggregate-function=sum --delim=, file1.txt --where-clauses "0=a,b" "2!=adam,catch" 
+
 is equivalent to the following SQL statement    
 
-    SELECT col0, SUM(col1)
-    WHERE col0 != "c"
-    GROUP BY col0
-    
+    SELECT col0, col2, sum(col1)
+    FROM file1.txt
+    WHERE col0 IN ("a", "b") AND col2 NOT IN ("adam", "catch")
+    GROUP BY col0, col2
+
 and will produce the following output for the file1.txt described in the 1st example
 
-    a,4.0
-    b,17.0
-    d,4.0
+    a,apple,1.0
+    b,boy,17.0
+
+You should specify the *verbose* option to print the SQL query equivalent to your passed parameters
 
 ### 4. Prefix search in a file
 Search within a *sorted* file using a string prefix
@@ -77,7 +79,7 @@ Search within a *sorted* file using a string prefix
 
 ##### Example
 
-For file2.txt from the 1st example:
+For file2.txt from the 1st example (as you can see file2.txt is already sorted):
 
     > ./file_searcher.py file2.txt b
     b,2,bat
