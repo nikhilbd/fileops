@@ -1,14 +1,20 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # Copyright 2013 Foursquare Labs Inc. All Rights Reserved.
 #
 # A bunch of common operations for the file set operations scripts
 # like file_intersection.py, file_diff.py etc.
 #
 
-import os, sys, csv_unicode, csv, argparse
+import os
+import sys
+import csv
+import argparse
+from typing import List, Union, TextIO
+
+from . import csv_unicode
 
 
-def set_ops_parser():
+def set_ops_parser() -> argparse.ArgumentParser:
     ''' Common arguments for the file_diff and the file_intersection scripts '''
 
     parser = argparse.ArgumentParser(add_help=False,
@@ -33,11 +39,11 @@ def set_ops_parser():
     return parser
 
 KEY_DELIMITER='\t'
-def get_key(cols, key_cols):
+def get_key(cols: List[str], key_cols: List[int]) -> str:
     key = cols[key_cols[0]]
     for i in range(1, len(key_cols)):
         key += KEY_DELIMITER + cols[key_cols[i]]
     return key
 
-def split_key(key):
+def split_key(key: str) -> List[str]:
     return key.split(KEY_DELIMITER)

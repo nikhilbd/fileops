@@ -1,23 +1,28 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # Copyright 2013 Foursquare Labs Inc. All Rights Reserved.
 #
 # For unicode csv reader & writer support
-# See http://docs.python.org/2/library/csv.html for more info
+# See https://docs.python.org/3/library/csv.html for more info
 
-import csv, codecs, cStringIO
+import csv
+import codecs
+import io
+from typing import Iterator, List, TextIO, Any
+
 
 class UTF8Recoder:
     """
     Iterator that reads an encoded stream and reencodes the input to UTF-8
     """
-    def __init__(self, f, encoding):
+    def __init__(self, f: TextIO, encoding: str) -> None:
         self.reader = codecs.getreader(encoding)(f)
 
-    def __iter__(self):
+    def __iter__(self) -> 'UTF8Recoder':
         return self
 
-    def next(self):
-        return self.reader.next().encode("utf-8")
+    def __next__(self) -> str:
+        return self.reader.__next__()
+
 
 class UnicodeReader:
     """
@@ -25,16 +30,16 @@ class UnicodeReader:
     which is encoded in the given encoding.
     """
 
-    def __init__(self, f, dialect=csv.excel, encoding="utf-8", **kwds):
-        f = UTF8Recoder(f, encoding)
+    def __init__(self, f: TextIO, dialect: csv.Dialect = csv.excel, encoding: str = "utf-8", **kwds: Any) -> None:
         self.reader = csv.reader(f, dialect=dialect, **kwds)
 
-    def next(self):
-        row = self.reader.next()
-        return [unicode(s, "utf-8") for s in row]
+    def __next__(self) -> List[str]:
+        row = next(self.reader)
+        return [str(s) for s in row]
 
-    def __iter__(self):
+    def __iter__(self) -> 'UnicodeReader':
         return self
+
 
 class UnicodeWriter:
     """
@@ -42,25 +47,19 @@ class UnicodeWriter:
     which is encoded in the given encoding.
     """
 
-    def __init__(self, f, dialect=csv.excel, encoding="utf-8", **kwds):
-        # Redirect output to a queue
-        self.queue = cStringIO.StringIO()
+    def __init__(self, f: TextIO, dialect: csv.Dialect = csv.excel, encoding: str = "utf-8", **kwds: Any) -> None:
+        self.queue = io.StringIO()
         self.writer = csv.writer(self.queue, dialect=dialect, **kwds)
         self.stream = f
         self.encoder = codecs.getincrementalencoder(encoding)()
 
-    def writerow(self, row):
-        self.writer.writerow([s.encode("utf-8") for s in row])
-        # Fetch UTF-8 output from the queue ...
+    def writerow(self, row: List[str]) -> None:
+        self.writer.writerow(row)
         data = self.queue.getvalue()
-        data = data.decode("utf-8")
-        # ... and reencode it into the target encoding
-        data = self.encoder.encode(data)
-        # write to the target stream
         self.stream.write(data)
-        # empty queue
         self.queue.truncate(0)
+        self.queue.seek(0)
 
-    def writerows(self, rows):
+    def writerows(self, rows: Iterator[List[str]]) -> None:
         for row in rows:
             self.writerow(row)
